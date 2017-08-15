@@ -2,7 +2,14 @@
 <cronentries>
   <cron>
     <url>/scrape</url>
-    <description>Repopulate the cache every 2 minutes</description>
+    <description>scrape the gxs</description>
     <schedule>every 24 hours</schedule>
+    <url>/email</url>
+    <description>email status report</description>
+    <schedule>every 24 hours</schedule>
+    <url>/scrape</url>
+    <description></description>
+    <schedule>every 24 hours</schedule>
+    
   </cron>
 </cronentries>

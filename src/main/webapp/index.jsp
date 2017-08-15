@@ -31,9 +31,10 @@
       <td colspan="2" style="font-weight:bold;">Available Servlets:</td>
     </tr>
     <tr>
-      <td><a href='/hello'>The servlet</a></td>
-      <td><a href='/vs'>The vs</a></td>
-      <td><a href='/cs'>The cs</a></td>
+      <td><a href='/scrape'>The scrape</a></td>
+      <td><a href='/email'>The email</a></td>
+      <td><a href='/delivery'>The delivery</a></td>
+      <td><a href='/log'>The log</a></td>
     </tr>
   </table>
 

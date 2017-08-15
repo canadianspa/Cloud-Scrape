@@ -21,14 +21,11 @@ import com.google.appengine.api.mail.MailService.Message;
 import com.google.appengine.api.mail.MailServiceFactory;
 import com.google.common.base.Charsets;
 
-
+//scrapes gxs of all homebase order abnd creates status reports
 public class Scrape extends HttpServlet {
 
-	String api = "***REMOVED***";
-	ArrayList<StatusReport> listOfReports = new ArrayList<StatusReport>();
 	int pageOn;
 	int placeOn;
-	String firstPoSeen = "4517002484";
 	String poToGoTo;
 	boolean seenFirst = false;
 	boolean atLastFound = false;
@@ -37,26 +34,16 @@ public class Scrape extends HttpServlet {
 			throws IOException {
 
 		scrapeGSX();
-		resp.setContentType("text/plain");
-		for(StatusReport s : listOfReports)
-		{
-			resp.getWriter().println(s.orderNumber);
-			resp.getWriter().println(s.transactionDate);
-			resp.getWriter().println(s.originalCustomerOrderNumber + System.lineSeparator());
-
-		}
-
-		resp.getWriter().println(listOfReports.size());
 
 	}
 
 	public void scrapeGSX()
 	{
-		poToGoTo = firstPoSeen;
+		poToGoTo = sharedInformation.firstPoSeen;
 		atLastFound = false;
 		seenFirst = false;
-		pageOn = 2;
-		placeOn = 5;
+		pageOn = 1;
+		placeOn = 0;
 		try 
 		{
 			WebClient webClient = new WebClient(BrowserVersion.FIREFOX_52);
@@ -95,7 +82,8 @@ public class Scrape extends HttpServlet {
 							}
 							else
 							{
-								listOfReports.add(add);
+								sharedInformation.currentStatusReports.add(add);
+								sharedInformation.logs += "added report " + add.orderNumber + "\r\n";
 							}
 						} catch (Exception e) {
 						}
@@ -108,7 +96,6 @@ public class Scrape extends HttpServlet {
 			}
 
 			webClient.close();
-			emailStatusReport();
 
 		} catch (Exception e) {
 			System.out.println(e.getMessage());
@@ -144,7 +131,7 @@ public class Scrape extends HttpServlet {
 		//store first order seen
 		if(!seenFirst)
 		{
-			firstPoSeen = orderNumber;
+			sharedInformation.firstPoSeen = orderNumber;
 			seenFirst = true;
 		}
 		String custDetail = html.substring(html.indexOf("DELIVER TO"), html.indexOf("POST CODE"));
@@ -171,116 +158,36 @@ public class Scrape extends HttpServlet {
 
 		String name = html.substring(html.indexOf("CUSTOMER NAME") + 78, html.indexOf("<", html.indexOf("CUSTOMER NAME")+78));
 		name = name.substring(name.indexOf(" ") + 1,name.length());
-		String email = "placeholder@email.com";
-		String company = "placeholder";
+		String company = "Homebase";
 
-		Customer c = new Customer(email,telephone,mobile,fname,name,company,addr1,"",city,"United Kingdom",postCode);
+		Customer c = new Customer(telephone,mobile,fname,name,company,addr1,"",city,"United Kingdom",region,postCode);
 		
 		String closerToOrder = html.substring(html.indexOf("CASE COST"), html.indexOf("END OF ORDER"));
 		String[] orderSplit = closerToOrder.split("<!--EAE: please ignore, needed for variable storage -->");
 		
 		ArrayList<String> articleCodes = new ArrayList<String>();
 		ArrayList<String> quantity = new ArrayList<String>();
+		ArrayList<String> price = new ArrayList<String>();
+		ArrayList<String> tax = new ArrayList<String>();
 		
 		articleCodes.add(orderSplit[0].split("<td")[9].substring(orderSplit[0].split("<td")[9].indexOf(">") + 1, orderSplit[0].split("<td")[9].indexOf("<")));
 		quantity.add(orderSplit[0].split("<td")[11].substring(orderSplit[0].split("<td")[11].indexOf(">") + 1, orderSplit[0].split("<td")[11].indexOf("<")));
+		price.add(orderSplit[0].split("<td")[12].substring(orderSplit[0].split("<td")[12].indexOf(">") + 1, orderSplit[0].split("<td")[12].indexOf("<")));
+		tax.add("0.2");
 		
 		for(int i = 1; i < orderSplit.length - 1;i ++)
 		{
 			articleCodes.add(orderSplit[i].split("<td")[3].substring(orderSplit[0].split("<td")[9].indexOf(">") + 1, orderSplit[0].split("<td")[9].indexOf("<")));
 			quantity.add(orderSplit[i].split("<td")[5].substring(orderSplit[0].split("<td")[11].indexOf(">") + 1, orderSplit[0].split("<td")[11].indexOf("<")));
-
+			price.add(orderSplit[0].split("<td")[6].substring(orderSplit[0].split("<td")[12].indexOf(">") + 1, orderSplit[0].split("<td")[12].indexOf("<")));
+			tax.add("0.2");
 		}
 		
-		return new StatusReport(orderNumber,transactionDate,originalCustomerOrderNumber,articleCodes,quantity,c);
+		return new StatusReport(orderNumber,transactionDate,originalCustomerOrderNumber,articleCodes,quantity,price,tax,c);
 
 	}
 
-	public void emailStatusReport()
-	{
-
-		// Recipient's email ID needs to be mentioned.
-		String to = "jake.labelle@hotmail.co.uk";
-
-		// Sender's email ID needs to be mentioned
-		String from = "admiralpork@googlemail.com";
-		try{    
-			Message msg = new Message();
-			msg.setSender(from);
-			msg.setTo(to);
-			msg.setSubject("HomeBase Status Report");
-			Attachment atch = new Attachment("CanadianSpaCompany.HB1", createHB1().getBytes(Charsets.UTF_16));
-			msg.setAttachments(atch);
-			MailService ms = MailServiceFactory.getMailService();
-			ms.send(msg);
-
-		} catch (Exception e) {
-			System.out.println(e.getMessage());
-		}
-
-
-
-
-	}
-
-	//String which created HB1 depending on list of reports
-	public String createHB1()
-	{
-		return createHeader() + createBody() + createTail();
-
-	}
-
-	public String createHeader()
-	{
-		String head="";
-		head += "HDR";
-		head += "0001";
-		DateFormat dateFormat = new SimpleDateFormat("dd/MM/yy");
-		Date date = new Date();
-		head += dateFormat.format(date);
-		head += "1600";
-		head += "00000000";
-		head += "Canadian-Spa-Company";
-		head += "\r\n";
-		return head;
-
-	}
-
-	public String createBody()
-	{
-		String body ="";
-		for(StatusReport s : listOfReports)
-		{
-			body += "001";
-			body += s.orderNumber;
-			body += s.status;
-			body += s.transactionDate.substring(0, 6) + s.transactionDate.substring(8, 10);
-			body += "1600";
-			body += s.originalCustomerOrderNumber;
-			body += "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
-			body += "\r\n";
-		}
-		
-		return body;
-
-	}
-
-	public String createTail()
-	{
-		String tail="";
-		tail += "TLR";
-		tail += "0001";
-		DateFormat dateFormat = new SimpleDateFormat("dd/MM/yy");
-		Date date = new Date();
-		tail += dateFormat.format(date);
-		tail += "1600";
-		tail += "00000000";
-		tail += "Canadian-Spa-Company";
-		return tail;
-		
-		
-
-	}
+	
 	
 	
 

@@ -12,21 +12,30 @@
 		<url-pattern>/scrape</url-pattern>
 	</servlet-mapping>
 	<servlet>
-		<servlet-name>toVeeqoServer</servlet-name>
-		<servlet-class>gxs.toVeeqoServer</servlet-class>
+		<servlet-name>Email</servlet-name>
+		<servlet-class>gxs.Emailer</servlet-class>
 	</servlet>
 	<servlet-mapping>
-		<servlet-name>toVeeqoServer</servlet-name>
-		<url-pattern>/vs</url-pattern>
+		<servlet-name>Email</servlet-name>
+		<url-pattern>/email</url-pattern>
 	</servlet-mapping>
 	<servlet>
-		<servlet-name>gcs</servlet-name>
-		<servlet-class>gxs.GcsExampleServlet</servlet-class>
+		<servlet-name>DetectDelivery</servlet-name>
+		<servlet-class>gxs.DetectDelivery</servlet-class>
 	</servlet>
 	<servlet-mapping>
-		<servlet-name>gcs</servlet-name>
-		<url-pattern>/gs</url-pattern>
+		<servlet-name>DetectDelivery</servlet-name>
+		<url-pattern>/delivery</url-pattern>
 	</servlet-mapping>
+	<servlet>
+		<servlet-name>logs</servlet-name>
+		<servlet-class>gxs.LogOutput</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>logs</servlet-name>
+		<url-pattern>/logs</url-pattern>
+	</servlet-mapping>
+	
 	<welcome-file-list>
 		<welcome-file>index.jsp</welcome-file>
 	</welcome-file-list>
