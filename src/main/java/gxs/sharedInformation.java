@@ -5,12 +5,8 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 //this should be in files but dont understand how to use file store
 public class sharedInformation {
-	
-	//last po added
-	static String firstPoSeen = "4517002484";
 
-	static CopyOnWriteArrayList<StatusReport> currentStatusReports = new CopyOnWriteArrayList<StatusReport>();
-	static String logs = "";
+	static String APIKEY = "***REMOVED***";
 	//sku to atrticle codes
 	static String skuCsv = "KP-10014,478471,Grand Rapids 29In Deep Inflatable Spa,,Y,N,Y,Turn on \r\n" + 
 			"KP-10008,478473,Swift Current 2 29In Deep Foam Wall Spa ,,Y,N,Y,Turn on \r\n" + 
@@ -124,5 +120,34 @@ public class sharedInformation {
 			",432909,Canadian Spa Cabinet lifter,,,TRUE,, DISCON \r\n" + 
 			"KA-10027,432906,Top Mount Spa Cover Lifter,,,TRUE,,\r\n" + 
 			",375276,Canadian Spa SC Cover,,,No,, DISCON";
+
+	//finds article code in ToSku and returns the sku
+	public static String convertToSku(String article) throws Exception
+	{
+		String sku = "";
+		String lines[] = sharedInformation.skuCsv.split("\\r?\\n");
+		for(String s : lines)
+		{
+			String line[] = s.split(",");
+			if(line[1].equals(article))
+			{
+				sku = line[0];
+				break;
+			}
+
+		}
+		if(sku.equals(""))
+		{
+			throw new Exception("sku/article not found");
+		}
+		return sku;
+	}
+	
+	public static void main(String[] args) {
+	
+
+	}
+
+	
 
 }

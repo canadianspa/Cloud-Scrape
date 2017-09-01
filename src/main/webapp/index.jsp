@@ -34,7 +34,10 @@
       <td><a href='/scrape'>The scrape</a></td>
       <td><a href='/email'>The email</a></td>
       <td><a href='/delivery'>The delivery</a></td>
-      <td><a href='/log'>The log</a></td>
+      <td><a href='/logs'>The log</a></td>
+      <td><a href='/status'>The statusreport</a></td>
+      <td><a href='/setup'>The set up</a></td>
+      <td><a href='/test'>The test</a></td>
     </tr>
   </table>
 

@@ -3,13 +3,17 @@
   <cron>
     <url>/scrape</url>
     <description>scrape the gxs</description>
-    <schedule>every 24 hours</schedule>
+    <schedule>every day 01:00</schedule>
+    </cron>
+     <cron>
     <url>/email</url>
     <description>email status report</description>
-    <schedule>every 24 hours</schedule>
-    <url>/scrape</url>
-    <description></description>
-    <schedule>every 24 hours</schedule>
-    
-  </cron>
+    <schedule>every day 02:00</schedule>
+     </cron>
+      <cron>
+    <url>/delivery</url>
+    <description>check if its delivery</description>
+    <schedule>every day 03:00</schedule>
+     </cron>
+ 
 </cronentries>

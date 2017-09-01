@@ -3,10 +3,15 @@ import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.cache.Cache;
+import javax.cache.CacheException;
+import javax.cache.CacheFactory;
+import javax.cache.CacheManager;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -20,7 +25,6 @@ import com.google.appengine.api.mail.MailService.Attachment;
 import com.google.appengine.api.mail.MailService.Message;
 import com.google.appengine.api.mail.MailServiceFactory;
 import com.google.common.base.Charsets;
-
 //scrapes gxs of all homebase order abnd creates status reports
 public class Scrape extends HttpServlet {
 
@@ -39,13 +43,19 @@ public class Scrape extends HttpServlet {
 
 	public void scrapeGSX()
 	{
-		poToGoTo = sharedInformation.firstPoSeen;
+
+	
 		atLastFound = false;
 		seenFirst = false;
 		pageOn = 1;
 		placeOn = 0;
 		try 
 		{
+			
+			Cache cache;
+			CacheFactory cacheFactory = CacheManager.getInstance().getCacheFactory();
+	        cache = cacheFactory.createCache(Collections.emptyMap());
+	        poToGoTo = (String) cache.get("firstPoSeen");
 			WebClient webClient = new WebClient(BrowserVersion.FIREFOX_52);
 			webClient.getOptions().setRedirectEnabled(true);
 			webClient.getOptions().setJavaScriptEnabled(true);                                             
@@ -82,10 +92,15 @@ public class Scrape extends HttpServlet {
 							}
 							else
 							{
-								sharedInformation.currentStatusReports.add(add);
-								sharedInformation.logs += "added report " + add.orderNumber + "\r\n";
+								ArrayList<StatusReport> listOfReports = (ArrayList<StatusReport>) cache.get("currentStatusReports");
+								listOfReports.add(add);
+								cache.put("currentStatusReports",listOfReports);
+								cache.put("logs", cache.get("logs") + "added report " + add.orderNumber + "\r\n");
+								add.uploadOrder();
+
 							}
 						} catch (Exception e) {
+							e.printStackTrace();
 						}
 					}
 					placeOn += 1;
@@ -131,7 +146,10 @@ public class Scrape extends HttpServlet {
 		//store first order seen
 		if(!seenFirst)
 		{
-			sharedInformation.firstPoSeen = orderNumber;
+			Cache cache;
+			CacheFactory cacheFactory = CacheManager.getInstance().getCacheFactory();
+	        cache = cacheFactory.createCache(Collections.emptyMap());
+	        cache.put("firstPoSeen", orderNumber);
 			seenFirst = true;
 		}
 		String custDetail = html.substring(html.indexOf("DELIVER TO"), html.indexOf("POST CODE"));
@@ -142,7 +160,7 @@ public class Scrape extends HttpServlet {
 		String addr1 = custDetailSplit[5].substring(custDetailSplit[5].indexOf(">:") +3, custDetailSplit[5].length());
 		String city = custDetailSplit[8].substring(custDetailSplit[8].indexOf(">:") +3, custDetailSplit[8].length());
 		String region = custDetailSplit[11].substring(custDetailSplit[11].indexOf(">:")+3 , custDetailSplit[11].length());
-		
+
 		String postCode = html.substring(html.indexOf("POST CODE") + 84, html.indexOf("<", html.indexOf("POST CODE")+84));
 		String telephone = html.substring(html.indexOf("TELEPHONE") + 84, html.indexOf("<", html.indexOf("TELEPHONE")+84));
 		String mobile;
@@ -161,35 +179,38 @@ public class Scrape extends HttpServlet {
 		String company = "Homebase";
 
 		Customer c = new Customer(telephone,mobile,fname,name,company,addr1,"",city,"United Kingdom",region,postCode);
-		
+
 		String closerToOrder = html.substring(html.indexOf("CASE COST"), html.indexOf("END OF ORDER"));
 		String[] orderSplit = closerToOrder.split("<!--EAE: please ignore, needed for variable storage -->");
-		
+
 		ArrayList<String> articleCodes = new ArrayList<String>();
 		ArrayList<String> quantity = new ArrayList<String>();
 		ArrayList<String> price = new ArrayList<String>();
 		ArrayList<String> tax = new ArrayList<String>();
-		
+
 		articleCodes.add(orderSplit[0].split("<td")[9].substring(orderSplit[0].split("<td")[9].indexOf(">") + 1, orderSplit[0].split("<td")[9].indexOf("<")));
 		quantity.add(orderSplit[0].split("<td")[11].substring(orderSplit[0].split("<td")[11].indexOf(">") + 1, orderSplit[0].split("<td")[11].indexOf("<")));
-		price.add(orderSplit[0].split("<td")[12].substring(orderSplit[0].split("<td")[12].indexOf(">") + 1, orderSplit[0].split("<td")[12].indexOf("<")));
+		price.add(orderSplit[0].split("<td")[12].substring(orderSplit[0].split("<td")[12].indexOf(">") + 1, orderSplit[0].split("<td")[12].indexOf("<")).replace("£", ""));
+		//remove pound sign
+
 		tax.add("0.2");
-		
+
 		for(int i = 1; i < orderSplit.length - 1;i ++)
 		{
 			articleCodes.add(orderSplit[i].split("<td")[3].substring(orderSplit[0].split("<td")[9].indexOf(">") + 1, orderSplit[0].split("<td")[9].indexOf("<")));
 			quantity.add(orderSplit[i].split("<td")[5].substring(orderSplit[0].split("<td")[11].indexOf(">") + 1, orderSplit[0].split("<td")[11].indexOf("<")));
-			price.add(orderSplit[0].split("<td")[6].substring(orderSplit[0].split("<td")[12].indexOf(">") + 1, orderSplit[0].split("<td")[12].indexOf("<")));
+			price.add(orderSplit[0].split("<td")[6].substring(orderSplit[0].split("<td")[12].indexOf(">") + 1, orderSplit[0].split("<td")[12].indexOf("<")).replace("£", ""));
 			tax.add("0.2");
 		}
-		
+
+
 		return new StatusReport(orderNumber,transactionDate,originalCustomerOrderNumber,articleCodes,quantity,price,tax,c);
 
 	}
 
-	
-	
-	
+
+
+
 
 }
 
