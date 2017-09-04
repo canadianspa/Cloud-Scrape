@@ -24,7 +24,11 @@ import com.google.appengine.api.mail.MailService;
 import com.google.appengine.api.mail.MailService.Attachment;
 import com.google.appengine.api.mail.MailService.Message;
 import com.google.appengine.api.mail.MailServiceFactory;
+import com.google.appengine.api.taskqueue.Queue;
+import com.google.appengine.api.taskqueue.QueueFactory;
+import com.google.appengine.api.taskqueue.TaskOptions;
 import com.google.common.base.Charsets;
+import com.googlecode.objectify.ObjectifyService;
 //scrapes gxs of all homebase order abnd creates status reports
 public class Scrape extends HttpServlet {
 
@@ -34,10 +38,11 @@ public class Scrape extends HttpServlet {
 	boolean seenFirst = false;
 	boolean atLastFound = false;
 	@Override
-	public void doGet(HttpServletRequest req, HttpServletResponse resp)
+	public void doPost(HttpServletRequest req, HttpServletResponse resp)
 			throws IOException {
 
 		scrapeGSX();
+
 
 	}
 
@@ -78,11 +83,13 @@ public class Scrape extends HttpServlet {
 					page = webClient.getPage("https://gxstradeweb.gxsolc.com/edi-bin/EdiMailbox.pl?NextDocListed=Next&LastStartNum=" + (((pageOn -2)*10)+1) + "&box_type=in&lang=en&sort_var=");
 					page = (HtmlPage) page.executeJavaScript("window.open('https://gxstradeweb.gxsolc.com' + form.ReadUrl" + placeOn + ".value,'_self')").getNewPage();		
 					page = (HtmlPage) page.executeJavaScript("window.open(MAINAREA.location,'_self')").getNewPage();	
+					
 					String html = (String) page.executeJavaScript("document.documentElement.outerHTML").getJavaScriptResult();		
+					try {
 					if(isHomeBase(html))
 					{
 						//skip over store orders
-						try {
+					
 							StatusReport add = readHomeBaseHTML(html);
 							if(add.orderNumber.equals(poToGoTo))
 							{
@@ -92,16 +99,15 @@ public class Scrape extends HttpServlet {
 							}
 							else
 							{
-								ArrayList<StatusReport> listOfReports = (ArrayList<StatusReport>) cache.get("currentStatusReports");
-								listOfReports.add(add);
-								cache.put("currentStatusReports",listOfReports);
+								ObjectifyService.ofy().save().entity(add);
 								cache.put("logs", cache.get("logs") + "added report " + add.orderNumber + "\r\n");
-								add.uploadOrder();
+								//add.uploadOrder();
 
 							}
-						} catch (Exception e) {
-							e.printStackTrace();
+						
 						}
+					} catch (Exception e) {
+						e.printStackTrace();
 					}
 					placeOn += 1;
 				}
@@ -146,11 +152,11 @@ public class Scrape extends HttpServlet {
 		//store first order seen
 		if(!seenFirst)
 		{
-			Cache cache;
-			CacheFactory cacheFactory = CacheManager.getInstance().getCacheFactory();
-	        cache = cacheFactory.createCache(Collections.emptyMap());
-	        cache.put("firstPoSeen", orderNumber);
-			seenFirst = true;
+			//Cache cache;
+			//CacheFactory cacheFactory = CacheManager.getInstance().getCacheFactory();
+	        //cache = cacheFactory.createCache(Collections.emptyMap());
+	        //cache.put("firstPoSeen", orderNumber);
+			//seenFirst = true;
 		}
 		String custDetail = html.substring(html.indexOf("DELIVER TO"), html.indexOf("POST CODE"));
 

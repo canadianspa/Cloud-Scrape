@@ -17,6 +17,7 @@ public class Customer {
 		this.state = state;
 		this.zip = zip;
 	}
+	public Customer() {}
 	
 
 }

@@ -22,6 +22,7 @@ import java.nio.charset.StandardCharsets;
 import com.googlecode.objectify.annotation.Id;
 import com.googlecode.objectify.annotation.Entity;
 import com.googlecode.objectify.Key;
+import com.googlecode.objectify.Objectify;
 import com.googlecode.objectify.annotation.Parent;
 
 @Entity
@@ -38,6 +39,8 @@ public class StatusReport implements Serializable {
 			ArrayList<String> article, ArrayList<String> quanity, ArrayList<String> price, ArrayList<String> tax,
 			Customer customer) throws Exception {
 		super();
+
+		theList = Key.create(ListOfReports.class, "default");	   
 		this.orderNumber = orderNumber;
 		this.transactionDate = transactionDate;
 		this.originalCustomerOrderNumber = originalCustomerOrderNumber;
@@ -53,16 +56,16 @@ public class StatusReport implements Serializable {
 		this.tax = tax;
 		this.customer = customer;
 	}
-	
-	
+    private StatusReport() {}
+
 	public String  convertToSellableID(String sku)
 	{
 		try {
-			
+
 			URL url = new URL("https://api.veeqo.com/products?query=" + sku);
 			HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 			conn.setRequestProperty("x-api-key", sharedInformation.APIKEY);
-			
+
 			conn.setDoOutput(true);
 			conn.setRequestMethod("GET");
 			String body = IOUtils.toString(conn.getInputStream(), StandardCharsets.UTF_8);
@@ -70,10 +73,10 @@ public class StatusReport implements Serializable {
 			String sellableID = body.substring(body.indexOf("sellable_id") + 13,body.indexOf(",",body.indexOf(("sellable_id"))));
 			System.out.println("sellable id " + sellableID);
 			return sellableID;
-			
+
 
 		} catch (Exception e) {
-			
+
 			return e.getMessage();
 		}
 	}
@@ -82,13 +85,13 @@ public class StatusReport implements Serializable {
 	{
 		status = "C50";
 	}
-	
+
 	public void uploadOrder()
 	{
 		try {
 			Cache cache;
 			CacheFactory cacheFactory = CacheManager.getInstance().getCacheFactory();
-	        cache = cacheFactory.createCache(Collections.emptyMap());
+			cache = cacheFactory.createCache(Collections.emptyMap());
 			String lineItemAttributes = "";
 			for(int i =0 ; i < sku.size() -1; i ++)
 			{
@@ -129,7 +132,7 @@ public class StatusReport implements Serializable {
 					"        ]\r\n" + 
 					"    }\r\n" + 
 					"}";
-			
+
 			URL url = new URL("https://api.veeqo.com/orders");
 			HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 			conn.setRequestProperty("x-api-key", sharedInformation.APIKEY);
@@ -153,17 +156,17 @@ public class StatusReport implements Serializable {
 				String id =  sResponse.substring(sResponse.indexOf("id") + 4,sResponse.indexOf(",",sResponse.indexOf(("id"))));
 				veeqoOrderNumber = id;
 				cache.put("logs", cache.get("logs") + "order uploaded with id: " + veeqoOrderNumber + "\r\n");
-				
+
 			}
-			
-			
+
+
 		} catch (Exception e) {
-		
+
 			e.printStackTrace();
 		}
-	
+
 	}
-	
+
 
 
 
