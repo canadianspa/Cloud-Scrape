@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Iterator;
+import java.util.List;
 
 import javax.cache.Cache;
 import javax.cache.CacheException;
@@ -21,6 +22,8 @@ import com.google.appengine.api.mail.MailServiceFactory;
 import com.google.appengine.api.mail.MailService.Attachment;
 import com.google.appengine.api.mail.MailService.Message;
 import com.google.common.base.Charsets;
+import com.googlecode.objectify.Key;
+import com.googlecode.objectify.ObjectifyService;
 
 //sends email to customers and homebase, and removes c50
 public class Emailer extends HttpServlet {
@@ -103,7 +106,13 @@ public class Emailer extends HttpServlet {
 			CacheFactory cacheFactory = CacheManager.getInstance().getCacheFactory();
 			cache = cacheFactory.createCache(Collections.emptyMap());
 			String body ="";
-			ArrayList<StatusReport> listOfReports = (ArrayList<StatusReport>) cache.get("currentStatusReports");
+			Key<ListOfReports> theBook = Key.create(ListOfReports.class, "default");
+
+			List<StatusReport> listOfReports = ObjectifyService.ofy()
+					.load()
+					.type(StatusReport.class) 
+					.ancestor(theBook)
+					.list();// Anyone in this book			
 			for(StatusReport s : listOfReports )
 			{
 				body += "001";
@@ -147,16 +156,21 @@ public class Emailer extends HttpServlet {
 			Cache cache;
 			CacheFactory cacheFactory = CacheManager.getInstance().getCacheFactory();
 			cache = cacheFactory.createCache(Collections.emptyMap());
-			ArrayList<StatusReport> listOfReports = ((ArrayList<StatusReport>) cache.get("currentStatusReports"));
-			Iterator<StatusReport> itr = listOfReports.iterator();
-			while(itr.hasNext()){
-				StatusReport cStatusReport = itr.next();
-				if (cStatusReport.status.equals("C50"))
+			Key<ListOfReports> theBook = Key.create(ListOfReports.class, "default");
+
+			List<StatusReport> listOfReports = ObjectifyService.ofy()
+					.load()
+					.type(StatusReport.class) 
+					.ancestor(theBook)
+					.list();// Anyone in this book
+			for(StatusReport s : listOfReports )
+			{
+				if (s.status.equals("C50"))
 				{
-					itr.remove();
+					ObjectifyService.ofy().delete().entities(s);
 				}
 			}
-			cache.put("currentStatusReports", listOfReports);
+			
 
 		} catch (CacheException e) {
 			// TODO Auto-generated catch block

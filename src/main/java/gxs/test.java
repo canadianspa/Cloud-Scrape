@@ -34,25 +34,15 @@ public class test extends HttpServlet {
 		customer = new Customer("3","4","5","6","7","8","","9","United Kingdom","10","11");
 		StatusReport s;
 		try {
-			s = new StatusReport(orderNumber,transactionDate,originalCustomerOrderNumber,articleCodes,quanity,price,tax,customer);
-		    Key<ListOfReports> theBook = Key.create(ListOfReports.class, "default");
-			ObjectifyService.ofy().save().entity(s);
-
-			List<StatusReport> reports = ObjectifyService.ofy()
-			          .load()
-			          .type(StatusReport.class) // We want only Greetings
-			          .ancestor(theBook)
-			          .list();// Anyone in this book
 			
-		  
 
-			for(StatusReport sr: reports)
-			{
-				resp.getWriter().write(originalCustomerOrderNumber);
-			}
+			s = new StatusReport(orderNumber,transactionDate,originalCustomerOrderNumber,articleCodes,quanity,price,tax,customer);
+			s.uploadOrder();
+			
+			
+			
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			resp.getWriter().write(e.getMessage());
+			e.printStackTrace();
 		}
 
 

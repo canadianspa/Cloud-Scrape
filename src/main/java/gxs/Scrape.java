@@ -101,7 +101,7 @@ public class Scrape extends HttpServlet {
 							{
 								ObjectifyService.ofy().save().entity(add);
 								cache.put("logs", cache.get("logs") + "added report " + add.orderNumber + "\r\n");
-								//add.uploadOrder();
+								add.uploadOrder();
 
 							}
 						
@@ -152,11 +152,11 @@ public class Scrape extends HttpServlet {
 		//store first order seen
 		if(!seenFirst)
 		{
-			//Cache cache;
-			//CacheFactory cacheFactory = CacheManager.getInstance().getCacheFactory();
-	        //cache = cacheFactory.createCache(Collections.emptyMap());
-	        //cache.put("firstPoSeen", orderNumber);
-			//seenFirst = true;
+			Cache cache;
+			CacheFactory cacheFactory = CacheManager.getInstance().getCacheFactory();
+	        cache = cacheFactory.createCache(Collections.emptyMap());
+	        cache.put("firstPoSeen", orderNumber);
+			seenFirst = true;
 		}
 		String custDetail = html.substring(html.indexOf("DELIVER TO"), html.indexOf("POST CODE"));
 

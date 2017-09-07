@@ -26,12 +26,12 @@ public class currentStatusReport extends HttpServlet {
 
 		List<StatusReport> reports = ObjectifyService.ofy()
 				.load()
-				.type(StatusReport.class) // We want only Greetings
+				.type(StatusReport.class) 
 				.ancestor(theBook)
 				.list();// Anyone in this book
 		for(StatusReport s : reports )
 		{
-			resp.getWriter().print(s.orderNumber + " " + s.status + "\r\n");
+			resp.getWriter().print(s.orderNumber + " " + s.status +  " " + s.veeqoOrderNumber + "\r\n");
 		}
 
 	}

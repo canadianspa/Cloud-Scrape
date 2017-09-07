@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
+import java.util.List;
 
 import javax.cache.Cache;
 import javax.cache.CacheException;
@@ -28,6 +29,9 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import org.apache.commons.io.IOUtils;
+
+import com.googlecode.objectify.Key;
+import com.googlecode.objectify.ObjectifyService;
 
 public class DetectDelivery extends HttpServlet  {
 
@@ -51,70 +55,32 @@ public class DetectDelivery extends HttpServlet  {
 
 	public void findDelivered()
 	{
-		try {
-			Cache cache;
-			CacheFactory cacheFactory = CacheManager.getInstance().getCacheFactory();
-			cache = cacheFactory.createCache(Collections.emptyMap());
-			ArrayList<StatusReport> listOfReports = ((ArrayList<StatusReport>) cache.get("currentStatusReports"));
-			for(StatusReport s : listOfReports)
+	
+		Key<ListOfReports> theBook = Key.create(ListOfReports.class, "default");
+
+		List<StatusReport> listOfReports = ObjectifyService.ofy()
+				.load()
+				.type(StatusReport.class) 
+				.ancestor(theBook)
+				.list();// Anyone in this book
+		for(StatusReport s : listOfReports)
+		{
+			if(isDelivered(s.veeqoOrderNumber))
 			{
-				if(isDelivered(s.veeqoOrderNumber))
-				{
-					s.delivered();
+				s.delivered();
+				ObjectifyService.ofy().save().entity(s);
+				try {
+					Cache cache;
+					CacheFactory cacheFactory = CacheManager.getInstance().getCacheFactory();
+					cache = cacheFactory.createCache(Collections.emptyMap());
 					cache.put("logs", cache.get("logs") + s.orderNumber + " delivered \r\n");
-
+				} catch (CacheException e) {
+					e.printStackTrace();
 				}
+
 			}
-			cache.put("currentStatusReports", listOfReports);
-			
-		} catch (CacheException e) {
-			e.printStackTrace();
 		}
-	}
 
-	public boolean isDelivered2(String veeqoOrderNumber)
-	{
-		String APIKEY = "***REMOVED***";
-		Client client = ClientBuilder.newClient();
-		Response response = client.target("https://api.veeqo.com/orders/" + veeqoOrderNumber )
-				.request(MediaType.APPLICATION_JSON_TYPE)
-				.header("x-api-key", APIKEY)
-				.get();
-
-		//      "shipment": null MEANS NOT DELIVERED
-		String body = response.readEntity(String.class);
-
-		String shipment = body.substring(body.indexOf("\"shipment\""));
-		if(shipment.contains("\"shipment\":null"))
-		{
-			return false;
-		}
-		else
-		{
-
-			shipment = shipment.split(",")[1];
-			String sDate = shipment.substring(14,24);
-			Date shipmentdate;
-			DateFormat format = new SimpleDateFormat("yyyy-MM-dd");
-			try {
-				shipmentdate = format.parse(sDate);
-				//4 days after ship, count as delivered
-				Calendar cal = Calendar.getInstance();
-				cal.add(Calendar.DATE, -4);
-				Date date4daysago = cal.getTime();
-				if(shipmentdate.before(date4daysago))
-				{
-					return true;
-				}
-				else
-				{
-					return false;
-				}
-			} catch (ParseException e) {
-				return false;
-			}
-
-		}
 	}
 
 	public boolean isDelivered(String veeqoOrderNumber)

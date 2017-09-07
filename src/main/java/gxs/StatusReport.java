@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 
 import javax.cache.Cache;
+import javax.cache.CacheException;
 import javax.cache.CacheFactory;
 import javax.cache.CacheManager;
 
@@ -23,6 +24,7 @@ import com.googlecode.objectify.annotation.Id;
 import com.googlecode.objectify.annotation.Entity;
 import com.googlecode.objectify.Key;
 import com.googlecode.objectify.Objectify;
+import com.googlecode.objectify.ObjectifyService;
 import com.googlecode.objectify.annotation.Parent;
 
 @Entity
@@ -55,6 +57,8 @@ public class StatusReport implements Serializable {
 		this.price = price;
 		this.tax = tax;
 		this.customer = customer;
+		veeqoOrderNumber = "not set yet";
+
 	}
     private StatusReport() {}
 
@@ -86,9 +90,9 @@ public class StatusReport implements Serializable {
 		status = "C50";
 	}
 
-	public void uploadOrder()
+	public void uploadOrder() throws Exception
 	{
-		try {
+		//try {
 			Cache cache;
 			CacheFactory cacheFactory = CacheManager.getInstance().getCacheFactory();
 			cache = cacheFactory.createCache(Collections.emptyMap());
@@ -96,42 +100,42 @@ public class StatusReport implements Serializable {
 			for(int i =0 ; i < sku.size() -1; i ++)
 			{
 
-				lineItemAttributes +=  "            {\r\n" + 
-						"                \"quantity\": "+quanity.get(i)+",\r\n" + 
-						"                \"sellable_id\": "+convertToSellableID(sku.get(i))+",\r\n" + 
-						"                \"price_per_unit\": "+price.get(i)+",\r\n" + 
-						"                \"tax_rate\": "+tax.get(i)+"\r\n" + 
-						"            },\r\n";
-			}
-			lineItemAttributes +=  "            {\r\n" + 
-					"                \"quantity\": "+quanity.get(quanity.size() -1)+",\r\n" + 
-					"                \"sellable_id\": "+convertToSellableID(sku.get(quanity.size() -1))+",\r\n" + 
-					"                \"price_per_unit\": "+price.get(quanity.size() -1)+",\r\n" + 
-					"                \"tax_rate\": "+tax.get(quanity.size() -1)+"\r\n" + 
-					"            }\r\n";
-			String payload = "\r\n" + 
-					"{\r\n" + 
-					"    \"order\": {\r\n" + 
-					"        \"channel_id\": 46687,\r\n" + 
-					"        \"customer_id\": 7155742,\r\n" + 
-					"        \"deliver_to_attributes\": {\r\n" + 
-					"            \"address1\": \""+customer.addr1+"\",\r\n" + 
-					"            \"address2\": \""+customer.addr2+"\",\r\n" + 
-					"            \"city\": \""+customer.city+"\",\r\n" + 
-					"            \"company\": \""+customer.company+"\",\r\n" + 
-					"            \"country\": \""+customer.country+"\",\r\n" + 
-					"            \"customer_id\": 7155742,\r\n" + 
-					"            \"first_name\": \""+customer.firstName+"\",\r\n" + 
-					"            \"last_name\": \""+customer.lastName+"\",\r\n" + 
-					"            \"phone\": \""+customer.phone+"\",\r\n" + 
-					"            \"state\": \""+customer.state+"\",\r\n" + 
-					"            \"zip\": \""+customer.zip+"\"\r\n" + 
-					"        },\r\n" + 
-					"        \"line_items_attributes\": [\r\n" + 
-					lineItemAttributes +
-					"        ]\r\n" + 
-					"    }\r\n" + 
-					"}";
+				 lineItemAttributes +=  "            {\r\n" +  
+				          "                \"quantity\": "+quanity.get(i)+",\r\n" +  
+				          "                \"sellable_id\": "+convertToSellableID(sku.get(i))+",\r\n" +  
+				          "                \"price_per_unit\": "+price.get(i)+",\r\n" +  
+				          "                \"tax_rate\": "+tax.get(i)+"\r\n" +  
+				          "            },\r\n"; 
+				    } 
+				    lineItemAttributes +=  "            {\r\n" +  
+				        "                \"quantity\": "+quanity.get(quanity.size() -1)+",\r\n" +  
+				        "                \"sellable_id\": "+convertToSellableID(sku.get(quanity.size() -1))+",\r\n" +  
+				        "                \"price_per_unit\": "+price.get(quanity.size() -1)+",\r\n" +  
+				        "                \"tax_rate\": "+tax.get(quanity.size() -1)+"\r\n" +  
+				        "            }\r\n"; 
+				    String payload = ("\r\n" +  
+				        "{\r\n" +  
+				        "    \"order\": {\r\n" +  
+				        "        \"channel_id\": 46687,\r\n" +  
+				        "        \"customer_id\": 7014549,\r\n" +  
+				        "        \"deliver_to_attributes\": {\r\n" +  
+				        "            \"address1\": \""+customer.addr1+"\",\r\n" +  
+				        "            \"address2\": \""+customer.addr2+"\",\r\n" +  
+				        "            \"city\": \""+customer.city+"\",\r\n" +  
+				        "            \"company\": \""+customer.company+"\",\r\n" +  
+				        "            \"country\": \""+customer.country+"\",\r\n" +  
+				        "            \"customer_id\": 7155742,\r\n" +  
+				        "            \"first_name\": \""+customer.firstName+"\",\r\n" +  
+				        "            \"last_name\": \""+customer.lastName+"\",\r\n" +  
+				        "            \"phone\": \""+customer.phone+"\",\r\n" +  
+				        "            \"state\": \"\",\r\n" +  
+				        "            \"zip\": \""+customer.zip+"\"\r\n" +  
+				        "        },\r\n" +  
+				        "        \"line_items_attributes\": [\r\n" +  
+				        lineItemAttributes + 
+				        "        ]\r\n" +  
+				        "    }\r\n" +  
+				        "}"); 
 
 			URL url = new URL("https://api.veeqo.com/orders");
 			HttpURLConnection conn = (HttpURLConnection) url.openConnection();
@@ -155,15 +159,15 @@ public class StatusReport implements Serializable {
 			{
 				String id =  sResponse.substring(sResponse.indexOf("id") + 4,sResponse.indexOf(",",sResponse.indexOf(("id"))));
 				veeqoOrderNumber = id;
+				ObjectifyService.ofy().save().entity(this);
 				cache.put("logs", cache.get("logs") + "order uploaded with id: " + veeqoOrderNumber + "\r\n");
-
 			}
 
 
-		} catch (Exception e) {
+		//} catch (Exception e) {
 
-			e.printStackTrace();
-		}
+			//e.printStackTrace();
+		//}
 
 	}
 
