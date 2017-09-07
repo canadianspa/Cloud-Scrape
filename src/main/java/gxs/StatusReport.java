@@ -73,6 +73,7 @@ public class StatusReport implements Serializable {
 			conn.setDoOutput(true);
 			conn.setRequestMethod("GET");
 			String body = IOUtils.toString(conn.getInputStream(), StandardCharsets.UTF_8);
+			//this is required or variants get weird
 			body = body.substring(body.indexOf("\"sku_code\":\"" + sku + "\""));
 			String sellableID = body.substring(body.indexOf("sellable_id") + 13,body.indexOf(",",body.indexOf(("sellable_id"))));
 			System.out.println("sellable id " + sellableID);
@@ -89,54 +90,61 @@ public class StatusReport implements Serializable {
 	{
 		status = "C50";
 	}
+	//creates the string which creates a order
+	public String createPayload()
+	{
+		String lineItemAttributes = "";
+		for(int i =0 ; i < sku.size() -1; i ++)
+		{
 
+			 lineItemAttributes +=  "            {\r\n" +  
+			          "                \"quantity\": "+quanity.get(i)+",\r\n" +  
+			          "                \"sellable_id\": "+convertToSellableID(sku.get(i))+",\r\n" +  
+			          "                \"price_per_unit\": "+price.get(i)+",\r\n" +  
+			          "                \"tax_rate\": "+tax.get(i)+"\r\n" +  
+			          "            },\r\n"; 
+			    } 
+			    lineItemAttributes +=  "            {\r\n" +  
+			        "                \"quantity\": "+quanity.get(quanity.size() -1)+",\r\n" +  
+			        "                \"sellable_id\": "+convertToSellableID(sku.get(quanity.size() -1))+",\r\n" +  
+			        "                \"price_per_unit\": "+price.get(quanity.size() -1)+",\r\n" +  
+			        "                \"tax_rate\": "+tax.get(quanity.size() -1)+"\r\n" +  
+			        "            }\r\n"; 
+			    String payload = ("\r\n" +  
+			        "{\r\n" +  
+			        "    \"order\": {\r\n" +  
+			        "        \"channel_id\": 46687,\r\n" +  
+			        "        \"customer_id\": 7014549,\r\n" +  
+			        "        \"deliver_to_attributes\": {\r\n" +  
+			        "            \"address1\": \""+customer.addr1+"\",\r\n" +  
+			        "            \"address2\": \""+customer.addr2+"\",\r\n" +  
+			        "            \"city\": \""+customer.city+"\",\r\n" +  
+			        "            \"company\": \""+customer.company+"\",\r\n" +  
+			        "            \"country\": \""+customer.country+"\",\r\n" +  
+			        "            \"customer_id\": 7155742,\r\n" +  
+			        "            \"first_name\": \""+customer.firstName+"\",\r\n" +  
+			        "            \"last_name\": \""+customer.lastName+"\",\r\n" +  
+			        "            \"phone\": \""+customer.phone+"\",\r\n" +  
+			        "            \"state\": \"\",\r\n" +  
+			        "            \"zip\": \""+customer.zip+"\"\r\n" +  
+			        "        },\r\n" +  
+			        "        \"line_items_attributes\": [\r\n" +  
+			        lineItemAttributes + 
+			        "        ]\r\n" +  
+			        "    }\r\n" +  
+			        "}");
+			    
+			    return payload;
+
+	}
+	//sends the payload to veeqo and also stores the veeqo order number that is returned
 	public void uploadOrder() throws Exception
 	{
 		//try {
 			Cache cache;
 			CacheFactory cacheFactory = CacheManager.getInstance().getCacheFactory();
 			cache = cacheFactory.createCache(Collections.emptyMap());
-			String lineItemAttributes = "";
-			for(int i =0 ; i < sku.size() -1; i ++)
-			{
-
-				 lineItemAttributes +=  "            {\r\n" +  
-				          "                \"quantity\": "+quanity.get(i)+",\r\n" +  
-				          "                \"sellable_id\": "+convertToSellableID(sku.get(i))+",\r\n" +  
-				          "                \"price_per_unit\": "+price.get(i)+",\r\n" +  
-				          "                \"tax_rate\": "+tax.get(i)+"\r\n" +  
-				          "            },\r\n"; 
-				    } 
-				    lineItemAttributes +=  "            {\r\n" +  
-				        "                \"quantity\": "+quanity.get(quanity.size() -1)+",\r\n" +  
-				        "                \"sellable_id\": "+convertToSellableID(sku.get(quanity.size() -1))+",\r\n" +  
-				        "                \"price_per_unit\": "+price.get(quanity.size() -1)+",\r\n" +  
-				        "                \"tax_rate\": "+tax.get(quanity.size() -1)+"\r\n" +  
-				        "            }\r\n"; 
-				    String payload = ("\r\n" +  
-				        "{\r\n" +  
-				        "    \"order\": {\r\n" +  
-				        "        \"channel_id\": 46687,\r\n" +  
-				        "        \"customer_id\": 7014549,\r\n" +  
-				        "        \"deliver_to_attributes\": {\r\n" +  
-				        "            \"address1\": \""+customer.addr1+"\",\r\n" +  
-				        "            \"address2\": \""+customer.addr2+"\",\r\n" +  
-				        "            \"city\": \""+customer.city+"\",\r\n" +  
-				        "            \"company\": \""+customer.company+"\",\r\n" +  
-				        "            \"country\": \""+customer.country+"\",\r\n" +  
-				        "            \"customer_id\": 7155742,\r\n" +  
-				        "            \"first_name\": \""+customer.firstName+"\",\r\n" +  
-				        "            \"last_name\": \""+customer.lastName+"\",\r\n" +  
-				        "            \"phone\": \""+customer.phone+"\",\r\n" +  
-				        "            \"state\": \"\",\r\n" +  
-				        "            \"zip\": \""+customer.zip+"\"\r\n" +  
-				        "        },\r\n" +  
-				        "        \"line_items_attributes\": [\r\n" +  
-				        lineItemAttributes + 
-				        "        ]\r\n" +  
-				        "    }\r\n" +  
-				        "}"); 
-
+			String payload = createPayload();
 			URL url = new URL("https://api.veeqo.com/orders");
 			HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 			conn.setRequestProperty("x-api-key", sharedInformation.APIKEY);
@@ -148,6 +156,8 @@ public class StatusReport implements Serializable {
 			writer.write(payload);
 			writer.close();
 			String sResponse = IOUtils.toString(conn.getInputStream(), StandardCharsets.UTF_8);
+			//if response is a error log it
+			//should add more errors 
 			if (sResponse.equals("{\r\n" + 
 					"  \"status\": \"404\",\r\n" + 
 					"  \"error\": \"Not Found\"\r\n" + 
@@ -157,6 +167,7 @@ public class StatusReport implements Serializable {
 			}
 			else
 			{
+			//else save the order number that is returned
 				String id =  sResponse.substring(sResponse.indexOf("id") + 4,sResponse.indexOf(",",sResponse.indexOf(("id"))));
 				veeqoOrderNumber = id;
 				ObjectifyService.ofy().save().entity(this);

@@ -118,8 +118,10 @@ public class Scrape extends HttpServlet {
 					} catch (Exception e) {
 						e.printStackTrace();
 					}
+					//keep adding one to place to go to the next order
 					placeOn += 1;
 				}
+				//at place 10 change it to 0 and go up a page
 				placeOn = 0;
 				pageOn += 1;
 
