@@ -50,8 +50,11 @@ public class Scrape extends HttpServlet {
 	{
 
 	
+		//not at the last found order yet
 		atLastFound = false;
+		//becomes true the first time it sees a order
 		seenFirst = false;
+		//start at the first item on gsx
 		pageOn = 1;
 		placeOn = 0;
 		try 
@@ -60,6 +63,7 @@ public class Scrape extends HttpServlet {
 			Cache cache;
 			CacheFactory cacheFactory = CacheManager.getInstance().getCacheFactory();
 	        cache = cacheFactory.createCache(Collections.emptyMap());
+	        //keep scraping until you reach the first order it saw last scrape
 	        poToGoTo = (String) cache.get("firstPoSeen");
 			WebClient webClient = new WebClient(BrowserVersion.FIREFOX_52);
 			webClient.getOptions().setRedirectEnabled(true);
@@ -72,7 +76,9 @@ public class Scrape extends HttpServlet {
 			webClient.setAjaxController(new NicelyResynchronizingAjaxController());
 			webClient.waitForBackgroundJavaScript(10000);
 
-			HtmlPage page = webClient.getPage("https://gxstradeweb.gxsolc.com/pub-log/login.html?lang=en");   
+			//go the the gxs website
+			HtmlPage page = webClient.getPage("https://gxstradeweb.gxsolc.com/pub-log/login.html?lang=en");
+			//logs in 
 			page = (HtmlPage) page.executeJavaScript("form.User.value='***REMOVED***'; form.Password.value='***REMOVED***';form.submit.click();").getNewPage();
 			while(!atLastFound)
 			{
@@ -80,12 +86,16 @@ public class Scrape extends HttpServlet {
 				{
 					System.out.println(pageOn);
 					System.out.println(placeOn);
+					//goes the inbox (uses the page to make sure on the right page)
 					page = webClient.getPage("https://gxstradeweb.gxsolc.com/edi-bin/EdiMailbox.pl?NextDocListed=Next&LastStartNum=" + (((pageOn -2)*10)+1) + "&box_type=in&lang=en&sort_var=");
+					//goes the right place
 					page = (HtmlPage) page.executeJavaScript("window.open('https://gxstradeweb.gxsolc.com' + form.ReadUrl" + placeOn + ".value,'_self')").getNewPage();		
+					//goes to the order
 					page = (HtmlPage) page.executeJavaScript("window.open(MAINAREA.location,'_self')").getNewPage();	
-					
+					//reads the html from the order
 					String html = (String) page.executeJavaScript("document.documentElement.outerHTML").getJavaScriptResult();		
 					try {
+					//makes sure its a homebase order
 					if(isHomeBase(html))
 					{
 						//skip over store orders
@@ -95,7 +105,6 @@ public class Scrape extends HttpServlet {
 							{
 								//reached the latest order added before
 								atLastFound = true;
-								System.out.println("hey");
 							}
 							else
 							{
@@ -123,6 +132,7 @@ public class Scrape extends HttpServlet {
 		}
 	}
 
+	//if the html contains the string HOMEBASE then its a homebase order
 	public boolean isHomeBase(String html)
 	{
 		return html.contains("HOMEBASE");

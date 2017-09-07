@@ -25,7 +25,8 @@ import com.google.common.base.Charsets;
 import com.googlecode.objectify.Key;
 import com.googlecode.objectify.ObjectifyService;
 
-//sends email to customers and homebase, and removes c50
+//sends email to customers and homebase, and removes c50,as we only need to send the C50 once
+//should also email all the C50 removed to us so we know what to invoice
 public class Emailer extends HttpServlet {
 
 	@Override
@@ -47,7 +48,7 @@ public class Emailer extends HttpServlet {
 
 	}
 
-
+	//sends the status report i have to created
 	public void emailStatusReport()
 	{
 
@@ -82,6 +83,7 @@ public class Emailer extends HttpServlet {
 
 	}
 
+	//header as said by the homebase supplier pdf
 	public String createHeader()
 	{
 
@@ -99,6 +101,7 @@ public class Emailer extends HttpServlet {
 
 	}
 
+	//this goes through each report, and creates a line of its information
 	public String createBody()
 	{
 		try {
@@ -133,6 +136,7 @@ public class Emailer extends HttpServlet {
 
 	}
 
+	//tail as said by the homebase supplier pdf
 	public String createTail()
 	{
 		String tail="";
@@ -150,6 +154,7 @@ public class Emailer extends HttpServlet {
 
 	}
 
+	//this removes all c50 from the status report
 	public void removeC50()
 	{
 		try {
@@ -167,6 +172,7 @@ public class Emailer extends HttpServlet {
 			{
 				if (s.status.equals("C50"))
 				{
+					cache.put("logs", cache.get("logs") + "removed status report " + s.orderNumber +  "\r\n");
 					ObjectifyService.ofy().delete().entities(s);
 				}
 			}

@@ -12,7 +12,7 @@ import javax.servlet.http.HttpServletResponse;
 import com.google.appengine.api.datastore.KeyFactory;
 import com.googlecode.objectify.Key;
 import com.googlecode.objectify.ObjectifyService;
-
+//just a test servlet that creates a report and uploads it
 public class test extends HttpServlet {
 	@Override
 	public void doGet(HttpServletRequest req, HttpServletResponse resp)

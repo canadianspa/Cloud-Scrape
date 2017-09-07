@@ -12,7 +12,7 @@ import com.google.appengine.api.taskqueue.TaskOptions;
 
 public class startScrape extends HttpServlet{
 	
-	
+	//starts the scraping in a push queue, this was important as without it was timing out after 2.5 pages
 	@Override
 	public void doGet(HttpServletRequest req, HttpServletResponse resp)
 			throws IOException {

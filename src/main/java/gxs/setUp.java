@@ -27,6 +27,7 @@ public class setUp extends HttpServlet {
 				Cache cache;
 				CacheFactory cacheFactory = CacheManager.getInstance().getCacheFactory();
 				cache = cacheFactory.createCache(Collections.emptyMap());
+				//reset the logs
 				cache.put("logs", "Start of logs \r\n");
 				//SET AS WHERE YOU WISH TO START
 				cache.put("firstPoSeen", "4517075836");

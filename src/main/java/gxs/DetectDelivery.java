@@ -53,6 +53,8 @@ public class DetectDelivery extends HttpServlet  {
 
 	}
 
+	//this servlet checks each order to see if it has been delivered
+	//if it has been delivered is sets the status to C50
 	public void findDelivered()
 	{
 	
@@ -83,6 +85,8 @@ public class DetectDelivery extends HttpServlet  {
 
 	}
 
+	//takes the veeqo order number and finds if it was shipped more than 4 days ago
+	//i use 4 days to make sure it has actually arrived
 	public boolean isDelivered(String veeqoOrderNumber)
 	{
 
