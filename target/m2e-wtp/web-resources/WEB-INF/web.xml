@@ -5,7 +5,7 @@
 	version="2.5">
 	<servlet>
 		<servlet-name>Scrape</servlet-name>
-		<servlet-class>gxs.Scrape</servlet-class>
+		<servlet-class>servlets.Scrape</servlet-class>
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>Scrape</servlet-name>
@@ -13,7 +13,7 @@
 	</servlet-mapping>
 	<servlet>
 		<servlet-name>ss</servlet-name>
-		<servlet-class>gxs.startScrape</servlet-class>
+		<servlet-class>servlets.startScrape</servlet-class>
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>ss</servlet-name>
@@ -21,7 +21,7 @@
 	</servlet-mapping>
 	<servlet>
 		<servlet-name>Email</servlet-name>
-		<servlet-class>gxs.Emailer</servlet-class>
+		<servlet-class>servlets.Emailer</servlet-class>
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>Email</servlet-name>
@@ -29,15 +29,15 @@
 	</servlet-mapping>
 	<servlet>
 		<servlet-name>DetectDelivery</servlet-name>
-		<servlet-class>gxs.DetectDelivery</servlet-class>
+		<servlet-class>servlets.DetectDelivery</servlet-class>
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>DetectDelivery</servlet-name>
-		<url-pattern>/delivery</url-pattern>
+		<url-pattern>/servlets</url-pattern>
 	</servlet-mapping>
 	<servlet>
 		<servlet-name>logs</servlet-name>
-		<servlet-class>gxs.LogOutput</servlet-class>
+		<servlet-class>servlets.LogOutput</servlet-class>
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>logs</servlet-name>
@@ -45,7 +45,7 @@
 	</servlet-mapping>
 	<servlet>
 		<servlet-name>statusReport</servlet-name>
-		<servlet-class>gxs.currentStatusReport</servlet-class>
+		<servlet-class>servlets.currentStatusReport</servlet-class>
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>statusReport</servlet-name>
@@ -53,7 +53,7 @@
 	</servlet-mapping>
 	<servlet>
 		<servlet-name>test</servlet-name>
-		<servlet-class>gxs.test</servlet-class>
+		<servlet-class>servlets.test</servlet-class>
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>test</servlet-name>
@@ -61,7 +61,7 @@
 	</servlet-mapping>
 	<servlet>
 		<servlet-name>setUp</servlet-name>
-		<servlet-class>gxs.setUp</servlet-class>
+		<servlet-class>servlets.setUp</servlet-class>
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>setUp</servlet-name>
@@ -76,7 +76,7 @@
 		<url-pattern>/*</url-pattern>
 	</filter-mapping>
 	<listener>
-		<listener-class>gxs.OfyHelper</listener-class>
+		<listener-class>entities.OfyHelper</listener-class>
 	</listener>
 	<welcome-file-list>
 		<welcome-file>index.jsp</welcome-file>
