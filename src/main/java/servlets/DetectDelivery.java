@@ -103,7 +103,7 @@ public class DetectDelivery extends HttpServlet  {
 					else
 					{
 						//make this false
-						return true;
+						return false;
 					}
 				} catch (ParseException e) {
 					return false;
