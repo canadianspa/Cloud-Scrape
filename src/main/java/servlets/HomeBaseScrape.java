@@ -15,11 +15,11 @@ import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import com.googlecode.objectify.ObjectifyService;
 
 import entities.Customer;
+import entities.HomeBasePurchaseOrder;
 import entities.Logs;
-import entities.PurchaseOrder;
 import entities.StatusReport;
 //scrapes gxs of all homebase order abnd creates status reports
-public class Scrape extends HttpServlet {
+public class HomeBaseScrape extends HttpServlet {
 
 	int pageOn;
 	int placeOn;
@@ -44,12 +44,12 @@ public class Scrape extends HttpServlet {
 		//becomes true the first time it sees a order
 		seenFirst = false;
 		//start at the first item on gsx
-		pageOn = 1;
+		pageOn = 2;
 		placeOn = 0;
 		try 
 		{
 			//keep scraping until you reach the first order it saw last scrape
-	        poToGoTo = ObjectifyService.ofy().load().type(PurchaseOrder.class).list().get(0).poNumber;
+	        poToGoTo = ObjectifyService.ofy().load().type(HomeBasePurchaseOrder.class).list().get(0).poNumber;
 			WebClient webClient = new WebClient(BrowserVersion.FIREFOX_52);
 			webClient.getOptions().setRedirectEnabled(true);
 			webClient.getOptions().setJavaScriptEnabled(true);                                             
@@ -93,8 +93,7 @@ public class Scrape extends HttpServlet {
 							}
 							else
 							{
-								ObjectifyService.ofy().save().entity(add);
-								Logs l = new Logs("added report " + add.orderNumber);
+								Logs l = new Logs("added homebase report " + add.orderNumber);
 								ObjectifyService.ofy().save().entity(l);
 								add.uploadOrder();
 
@@ -150,7 +149,7 @@ public class Scrape extends HttpServlet {
 		//store first order seen
 		if(!seenFirst)
 		{
-			PurchaseOrder p = new PurchaseOrder(orderNumber);
+			HomeBasePurchaseOrder p = new HomeBasePurchaseOrder(orderNumber);
 			ObjectifyService.ofy().save().entity(p);
 			seenFirst = true;
 		}

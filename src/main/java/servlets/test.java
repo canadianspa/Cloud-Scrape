@@ -10,8 +10,8 @@ import javax.servlet.http.HttpServletResponse;
 import com.googlecode.objectify.ObjectifyService;
 
 import entities.Customer;
+import entities.HomeBasePurchaseOrder;
 import entities.Logs;
-import entities.PurchaseOrder;
 import entities.StatusReport;
 //just a test servlet that creates a report and uploads it
 public class test extends HttpServlet {
@@ -40,10 +40,8 @@ public class test extends HttpServlet {
 			s = new StatusReport(orderNumber,transactionDate,originalCustomerOrderNumber,articleCodes,quanity,price,tax,customer);
 			Logs l = new Logs("hey");
 			ObjectifyService.ofy().save().entity(l);
-			PurchaseOrder p = new PurchaseOrder("123");
-			ObjectifyService.ofy().save().entity(p);
-
-			//s.uploadOrder();
+			HomeBasePurchaseOrder p = new HomeBasePurchaseOrder("123");
+			s.uploadOrder();
 			
 			
 			

@@ -17,22 +17,19 @@ import com.googlecode.objectify.annotation.Parent;
 
 import servlets.sharedInformation;
 
-@Entity
+
 public class StatusReport implements Serializable {
 
-	@Parent Key<ListOfReports> theList;
-	@Id public String orderNumber;
+	public String orderNumber;
 	public String transactionDate,originalCustomerOrderNumber,status;
 	public ArrayList<String> quanity,sku,price,tax;
 	public Customer customer;
-	public String veeqoOrderNumber;
 
 	public StatusReport(String orderNumber, String transactionDate, String originalCustomerOrderNumber,
 			ArrayList<String> article, ArrayList<String> quanity, ArrayList<String> price, ArrayList<String> tax,
 			Customer customer) throws Exception {
 		super();
 
-		theList = Key.create(ListOfReports.class, "default");	   
 		this.orderNumber = orderNumber;
 		this.transactionDate = transactionDate;
 		this.originalCustomerOrderNumber = originalCustomerOrderNumber;
@@ -42,15 +39,13 @@ public class StatusReport implements Serializable {
 		sku = new ArrayList<String>();
 		for(String a :article)
 		{
-			sku.add(sharedInformation.convertToSku(a));
+			sku.add(sharedInformation.convertToHomeBaseSku(a));
 		}
 		this.price = price;
 		this.tax = tax;
 		this.customer = customer;
-		veeqoOrderNumber = "not set yet";
 
 	}
-    private StatusReport() {}
 
 	public String  convertToSellableID(String sku)
 	{
@@ -104,7 +99,7 @@ public class StatusReport implements Serializable {
 			        "{\r\n" +  
 			        "    \"order\": {\r\n" +  
 			        "        \"channel_id\": 46687,\r\n" +  
-			        "        \"customer_id\": 7014549,\r\n" +  
+			        "        \"customer_id\": 7171309,\r\n" +  
 			        "        \"deliver_to_attributes\": {\r\n" +  
 			        "            \"address1\": \""+customer.addr1+"\",\r\n" +  
 			        "            \"address2\": \""+customer.addr2+"\",\r\n" +  
@@ -120,7 +115,10 @@ public class StatusReport implements Serializable {
 			        "        },\r\n" +  
 			        "        \"line_items_attributes\": [\r\n" +  
 			        lineItemAttributes + 
-			        "        ]\r\n" +  
+			        "        ],\r\n" +  
+			        "\"customer_note_attributes\": {\r\n" +
+					"        \"text\": \""+orderNumber + " " + originalCustomerOrderNumber +  "\"\r\n" + 
+					"      }\r\n" + 
 			        "    }\r\n" +  
 			        "}");
 			    
@@ -130,7 +128,6 @@ public class StatusReport implements Serializable {
 	//sends the payload to veeqo and also stores the veeqo order number that is returned
 	public void uploadOrder() throws Exception
 	{
-		//try {
 			String payload = createPayload();
 			URL url = new URL("https://api.veeqo.com/orders");
 			HttpURLConnection conn = (HttpURLConnection) url.openConnection();
@@ -142,33 +139,12 @@ public class StatusReport implements Serializable {
 			OutputStreamWriter writer = new OutputStreamWriter(conn.getOutputStream());
 			writer.write(payload);
 			writer.close();
-			String sResponse = IOUtils.toString(conn.getInputStream(), StandardCharsets.UTF_8);
-			//if response is a error log it
-			//should add more errors 
-			if (sResponse.equals("{\r\n" + 
-					"  \"status\": \"404\",\r\n" + 
-					"  \"error\": \"Not Found\"\r\n" + 
-					"}"))
-			{
-				Logs l = new Logs("problem with order with name: " + customer.firstName);
-				ObjectifyService.ofy().save().entity(l);
-			}
-			else
-			{
-			//else save the order number that is returned
-				String id =  sResponse.substring(sResponse.indexOf("id") + 4,sResponse.indexOf(",",sResponse.indexOf(("id"))));
-				veeqoOrderNumber = id;
-				ObjectifyService.ofy().save().entity(this);
-				Logs l = new Logs("order uploaded with id: " + veeqoOrderNumber);
-				ObjectifyService.ofy().save().entity(l);
-			}
+			conn.getInputStream();
+			Logs l = new Logs(orderNumber + " uploaded");
+			ObjectifyService.ofy().save().entity(l);
 
 
-		//} catch (Exception e) {
-
-			//e.printStackTrace();
-		//}
-
+		
 	}
 
 

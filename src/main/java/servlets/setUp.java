@@ -9,10 +9,10 @@ import javax.servlet.http.HttpServletResponse;
 import com.googlecode.objectify.Key;
 import com.googlecode.objectify.ObjectifyService;
 
+import entities.BNQPurchaseOrder;
+import entities.HomeBasePurchaseOrder;
 import entities.ListOfLogs;
-import entities.ListOfReports;
 import entities.Logs;
-import entities.PurchaseOrder;
 import entities.StatusReport;
 
 public class setUp extends HttpServlet {
@@ -35,21 +35,12 @@ public class setUp extends HttpServlet {
 					ObjectifyService.ofy().delete().entity(l);
 				}
 				//SET AS WHERE YOU WISH TO START
-				PurchaseOrder p = new PurchaseOrder("4517076599");
-				ObjectifyService.ofy().save().entity(p);
-				//REMOVES ALL REPORTS
-				Key<ListOfReports> theBook = Key.create(ListOfReports.class, "default");
-
-				List<StatusReport> reports = ObjectifyService.ofy()
-						.load()
-						.type(StatusReport.class)
-						.ancestor(theBook)
-						.list();// Anyone in this book
-				for(StatusReport s : reports )
-				{
-					ObjectifyService.ofy().delete().entity(s);
-				}
+				HomeBasePurchaseOrder p = new HomeBasePurchaseOrder("4517082080");
+				ObjectifyService.ofy().save().entities(p);
 				
+				//SET AS WHERE YOU WISH TO START
+				BNQPurchaseOrder b = new BNQPurchaseOrder("84043526");
+				ObjectifyService.ofy().save().entities(b);
 			} catch (Exception e) {
 				resp.getWriter().write(e.getMessage());
 			}

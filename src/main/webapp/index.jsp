@@ -31,11 +31,9 @@
       <td colspan="2" style="font-weight:bold;">Available Servlets:</td>
     </tr>
     <tr>
-      <td><a href='/ss'>The scrape</a></td>
-      <td><a href='/email'>The email</a></td>
-      <td><a href='/delivery'>The delivery</a></td>
+      <td><a href='/hs'>The homebase scrape</a></td>
+      <td><a href='/bs'>The bnq scrape</a></td>
       <td><a href='/logs'>The log</a></td>
-      <td><a href='/status'>The statusreport</a></td>
       <td><a href='/setup'>The set up</a></td>
       <td><a href='/test'>The test</a></td>
     </tr>

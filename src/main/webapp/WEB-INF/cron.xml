@@ -1,19 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <cronentries>
   <cron>
-    <url>/ss</url>
+    <url>/hs</url>
     <description>scrape the gxs</description>
     <schedule>every day 01:00</schedule>
     </cron>
-     <cron>
-    <url>/email</url>
-    <description>email status report</description>
-    <schedule>every day 02:00</schedule>
-     </cron>
-      <cron>
-    <url>/delivery</url>
-    <description>check if its delivery</description>
-    <schedule>every day 03:00</schedule>
-     </cron>
  
 </cronentries>

@@ -5,17 +5,18 @@ import com.googlecode.objectify.annotation.Id;
 
 //holds the first po that was seen last scrape
 @Entity
-public class PurchaseOrder {
+public class HomeBasePurchaseOrder {
 	
 	public String poNumber;
+	
 	//so it doesnt create multiple ones
 	@Id public String oneOf = "default";
 
-	public PurchaseOrder(String poNumber) {
+	public HomeBasePurchaseOrder(String poNumber) {
 		super();
 		this.poNumber = poNumber;
 	}
-	public PurchaseOrder(){}
+	public HomeBasePurchaseOrder(){}
 	
 
 }

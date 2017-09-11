@@ -4,36 +4,36 @@
 	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
 	version="2.5">
 	<servlet>
-		<servlet-name>Scrape</servlet-name>
-		<servlet-class>servlets.Scrape</servlet-class>
+		<servlet-name>HomeBaseScrape</servlet-name>
+		<servlet-class>servlets.HomeBaseScrape</servlet-class>
 	</servlet>
 	<servlet-mapping>
-		<servlet-name>Scrape</servlet-name>
-		<url-pattern>/scrape</url-pattern>
+		<servlet-name>HomeBaseScrape</servlet-name>
+		<url-pattern>/hscrape</url-pattern>
 	</servlet-mapping>
 	<servlet>
-		<servlet-name>ss</servlet-name>
-		<servlet-class>servlets.startScrape</servlet-class>
+		<servlet-name>hs</servlet-name>
+		<servlet-class>servlets.startHomeBaseScrape</servlet-class>
 	</servlet>
 	<servlet-mapping>
-		<servlet-name>ss</servlet-name>
-		<url-pattern>/ss</url-pattern>
+		<servlet-name>hs</servlet-name>
+		<url-pattern>/hs</url-pattern>
 	</servlet-mapping>
 	<servlet>
-		<servlet-name>Email</servlet-name>
-		<servlet-class>servlets.Emailer</servlet-class>
+		<servlet-name>BNQScrape</servlet-name>
+		<servlet-class>servlets.BNQScrape</servlet-class>
 	</servlet>
 	<servlet-mapping>
-		<servlet-name>Email</servlet-name>
-		<url-pattern>/email</url-pattern>
+		<servlet-name>BNQScrape</servlet-name>
+		<url-pattern>/bscrape</url-pattern>
 	</servlet-mapping>
 	<servlet>
-		<servlet-name>DetectDelivery</servlet-name>
-		<servlet-class>servlets.DetectDelivery</servlet-class>
+		<servlet-name>bs</servlet-name>
+		<servlet-class>servlets.startBNQScrape</servlet-class>
 	</servlet>
 	<servlet-mapping>
-		<servlet-name>DetectDelivery</servlet-name>
-		<url-pattern>/servlets</url-pattern>
+		<servlet-name>bs</servlet-name>
+		<url-pattern>/bs</url-pattern>
 	</servlet-mapping>
 	<servlet>
 		<servlet-name>logs</servlet-name>
@@ -42,14 +42,6 @@
 	<servlet-mapping>
 		<servlet-name>logs</servlet-name>
 		<url-pattern>/logs</url-pattern>
-	</servlet-mapping>
-	<servlet>
-		<servlet-name>statusReport</servlet-name>
-		<servlet-class>servlets.currentStatusReport</servlet-class>
-	</servlet>
-	<servlet-mapping>
-		<servlet-name>statusReport</servlet-name>
-		<url-pattern>/status</url-pattern>
 	</servlet-mapping>
 	<servlet>
 		<servlet-name>test</servlet-name>
